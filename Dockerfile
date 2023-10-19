@@ -203,7 +203,5 @@ RUN sed -re "s/c.ServerApp/c.NotebookApp/g" \
 # Import matplotlib the first time to build the font cache.
 ENV XDG_CACHE_HOME="${HOME}/.cache/"
 RUN MPLBACKEND=Agg python -c "import matplotlib.pyplot"
-# Configure container startup
-ENTRYPOINT ["tini", "-g", "--"]
 
 WORKDIR "${HOME}"
