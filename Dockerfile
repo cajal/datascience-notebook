@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.4.1-devel-ubuntu20.04
+FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu18.04
 LABEL mantainer="Zhuokun Ding <zhuokund@bcm.edu>, Stelios Papadopoulos <spapadop@bcm.edu>, Christos Papadopoulos <cpapadop@bcm.edu>"
 # The following dockerfile is based on jupyter/docker-stacks: https://github.com/jupyter/docker-stacks
 
@@ -25,7 +25,7 @@ RUN apt-get update --yes && \
     # - tini is installed as a helpful container entrypoint that reaps zombie
     #   processes and such of the actual executable we want to start, see
     #   https://github.com/krallin/tini#why-tini for details.
-    tini \
+    # tini \  # not available in ubuntu 18.04
     # - pandoc is used to convert notebooks to html files
     #   it's not present in aarch64 ubuntu image, so we install it here
     pandoc \
@@ -108,6 +108,10 @@ RUN set -x && \
     mamba list python | grep '^python ' | tr -s ' ' | cut -d ' ' -f 1,2 >> "${CONDA_DIR}/conda-meta/pinned" && \
     # Pin libblas
     echo 'libblas=*=*mkl' >> "${CONDA_DIR}/conda-meta/pinned" && \
+    # Pin numpy version to 1.23.5
+    echo 'numpy==1.23.5' >> "${CONDA_DIR}/conda-meta/pinned" && \
+    # Pin torch version 
+    echo 'torch==2.1' >> "${CONDA_DIR}/conda-meta/pinned" && \
     mamba install --yes \
         'git' \
         'pip' \
@@ -179,7 +183,7 @@ RUN set -x && \
         'tqdm'
 
     # pytorch
-RUN mamba install --yes pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit=11.3 -c pytorch && \
+RUN mamba install --yes pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia && \
     mamba update ffmpeg && \
     jupyter notebook --generate-config && \
     mamba clean --all -f -y && \
