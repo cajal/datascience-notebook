@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu18.04
+FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu20.04
 LABEL mantainer="Zhuokun Ding <zhuokund@bcm.edu>, Stelios Papadopoulos <spapadop@bcm.edu>, Christos Papadopoulos <cpapadop@bcm.edu>"
 # The following dockerfile is based on jupyter/docker-stacks: https://github.com/jupyter/docker-stacks
 
@@ -103,16 +103,18 @@ RUN set -x && \
         --yes \
         "${PYTHON_SPECIFIER}" \
         'mamba' &&\
-    rm micromamba && \
-    # Pin major.minor version of python
-    mamba list python | grep '^python ' | tr -s ' ' | cut -d ' ' -f 1,2 >> "${CONDA_DIR}/conda-meta/pinned" && \
+    rm micromamba
+
+# Pin major.minor version of python
+RUN echo "python=${PYTHON_VERSION}" >> "${CONDA_DIR}/conda-meta/pinned" && \
     # Pin libblas
     echo 'libblas=*=*mkl' >> "${CONDA_DIR}/conda-meta/pinned" && \
     # Pin numpy version to 1.23.5
     echo 'numpy==1.23.5' >> "${CONDA_DIR}/conda-meta/pinned" && \
     # Pin torch version 
-    echo 'torch==2.1' >> "${CONDA_DIR}/conda-meta/pinned" && \
-    mamba install --yes \
+    echo 'torch==2.1' >> "${CONDA_DIR}/conda-meta/pinned"
+
+RUN mamba install --yes \
         'git' \
         'pip' \
         'notebook' \
